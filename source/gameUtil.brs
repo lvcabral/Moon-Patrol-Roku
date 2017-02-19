@@ -19,9 +19,12 @@ Function GetConstants() as object
     const.MOON_MOUNTAIN = 0
     const.MOON_CITY     = 1
 
-    const.BACK_MOUNTAIN_Y  = 208
-    const.FRONT_MOUNTAIN_Y = 280
-    const.FRONT_CITY_Y     = 276
+    const.COURSE_BEGGINER = 0
+    const.COURSE_CHAMPION = 1
+
+    const.BACK_MOUNTAIN_Y  = 188
+    const.FRONT_MOUNTAIN_Y = 258
+    const.FRONT_CITY_Y     = 256
     const.GROUND_LEVEL_Y   = 320
 
     const.PANEL_WIDTH      = 640
@@ -41,8 +44,26 @@ Function GetConstants() as object
     const.LAYER2_Z = 22
     const.BUGGY_Z  = 30
     const.ENEMY_Z  = 40
+    const.SCORE_Z  = 50
 
     return const
+End Function
+
+Function LoadBitmapRegions(path as string, jsonFile as string, pngFile = "" as string) as object
+    if pngFile = ""
+        pngFile = jsonFile
+    end if
+    print "loading ";path + jsonFile + ".json"
+    json = ParseJson(ReadAsciiFile(path + jsonFile + ".json"))
+    regions = {}
+    if json <> invalid
+        bitmap = CreateObject("roBitmap", path + pngFile + ".png")
+        for each name in json.frames
+            frame = json.frames.Lookup(name).frame
+            regions.AddReplace(name, CreateObject("roRegion", bitmap, frame.x, frame.y, frame.w, frame.h))
+        next
+    end if
+    return regions
 End Function
 
 Function GetRegion(image as string, wrap = false as boolean) as object
@@ -50,6 +71,57 @@ Function GetRegion(image as string, wrap = false as boolean) as object
     rgn = CreateObject("roRegion", bmp, 0, 0, bmp.GetWidth(), bmp.GetHeight())
     rgn.SetWrap(wrap)
     return rgn
+End Function
+
+Function GetTerrain(width as integer) as object
+    font = m.fonts.getFont("Press Start 2P", 14, false, false)
+    if m.settings.spriteMode = m.const.MODE_ARCADE
+        mColor = &h00DE51FF
+        gColor = &hFF9751FF
+        bColor = mColor
+        tColor = &h210000FF
+    else
+        mColor = &h00A000FF
+        gColor = &hC06000FF
+        bColor = gColor
+        tColor = m.colors.yellow
+    end if
+    bmp = CreateObject("roBitmap", {width:width, height:m.const.PANEL_HEIGHT, alphaenable:true})
+    bmp.DrawRect(0, 96, bmp.GetWidth(), 64, gColor)
+    c = 0
+    depth = (Rnd(5) - 1) * 2
+    s = 0
+    m.terrain = []
+    ap = [6, 6, 6, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 12, 12, 12]
+    while c < width
+        if s <= 0
+            path = ap[Rnd(ap.Count()) - 1]
+            dest = (Rnd(5) - 1) * 2
+            s = path
+        end if
+        if dest > depth
+            move = (Rnd(2) - 1) * 2
+        else if dest < depth
+            move = -(Rnd(2) - 1) * 2
+        else
+            move = 0
+        end if
+        depth += move
+        wide = (Rnd(4) + 1) * 2
+        if depth > 0
+            bmp.DrawRect(c, 96, wide, depth, mColor)
+        end if
+        for t = 1 to wide
+            m.terrain.Push(depth)
+        next
+        s -= wide
+        c += wide
+    end while
+    print "terrain array size = "; m.terrain.Count()
+    bmp.DrawRect(bmp.GetWidth() - 32, bmp.GetHeight() - 30, 16, 16, bColor)
+    bmp.DrawText("A", bmp.GetWidth() - 30, bmp.GetHeight() - 28, tColor, font)
+    bmp.Finish()
+    return bmp
 End Function
 
 '------- Registry Functions -------
@@ -83,9 +155,16 @@ Function LoadSettings() as dynamic
     if settings = invalid then settings = {}
     if settings.controlMode = invalid then settings.controlMode = m.const.CONTROL_VERTICAL
     if settings.spriteMode = invalid then settings.spriteMode = m.const.MODE_ARCADE
-    if settings.highScores = invalid then settings.highScores = [ {score: 0, name: ""} ]
+    'if settings.highScores = invalid
+        settings.highScores = [ {score: 750, point: "A", name: "MLC"},
+                                {score: 0, point: "", name: ""},
+                                {score: 0, point: "", name: ""},
+                                {score: 0, point: "", name: ""},
+                                {score: 0, point: "", name: ""}]
+    'end if
     return settings
 End Function
+
 '------- Numeric and String Functions -------
 
 Function itostr(i as integer) as string

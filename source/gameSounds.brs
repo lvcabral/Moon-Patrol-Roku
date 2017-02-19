@@ -17,13 +17,13 @@ Function LoadSounds(enable as boolean) as object
                 navSingle : CreateObject("roAudioResource", "navsingle"),
                 select : CreateObject("roAudioResource", "select")
              }
-    ' sounds.metadata = ParseJson(ReadAsciiFile(sounds.folder + "sounds.json"))
-    ' for each name in sounds.metadata.clips
-    '     clip = sounds.metadata.clips.Lookup(name)
-    '     if clip.type = "wav"
-    '         sounds.AddReplace(name,CreateObject("roAudioResource", sounds.folder + name + ".wav"))
-    '     end if
-    ' next
+    sounds.metadata = ParseJson(ReadAsciiFile(sounds.folder + "sounds.json"))
+    for each name in sounds.metadata.clips
+        clip = sounds.metadata.clips.Lookup(name)
+        if clip.type = "wav"
+            sounds.AddReplace(name,CreateObject("roAudioResource", sounds.folder + name + ".wav"))
+        end if
+    next
     return sounds
 End Function
 
@@ -47,6 +47,7 @@ End Sub
 
 Sub PlaySound(clip as string, overlap = false as boolean, volume = 75 as integer)
     g = GetGlobalAA()
+    if not g.sounds.enabled then return
     meta = g.sounds.metadata.clips.Lookup(clip)
     if meta = invalid then return
     if meta.type = "mp3"
@@ -58,7 +59,6 @@ End Sub
 
 Sub PlaySoundMp3(meta as object, clip as string, overlap as boolean)
     g = GetGlobalAA()
-    if not g.sounds.enabled then return
     ctrl = g.sounds.mp3
     if ctrl.cycles = 0 or meta.priority > ctrl.priority or (ctrl.clip = clip and overlap)
         'print "play sound mp3: "; clip
@@ -73,7 +73,6 @@ End Sub
 
 Sub PlaySoundWav(meta as object, clip as string, volume = 75 as integer)
     g = GetGlobalAA()
-    if not g.sounds.enabled then return
     channel = -1
     ctrl = g.sounds.wav
     for c = 0 to 1

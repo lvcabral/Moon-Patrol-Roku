@@ -1,0 +1,16 @@
+{
+    "clips": {
+        "theme":
+        {
+           "type":"mp3",
+           "duration":25547,
+           "priority":10
+        },
+        "start-course":
+        {
+           "type":"wav",
+           "duration":4440,
+           "priority":10
+        }
+    }
+}

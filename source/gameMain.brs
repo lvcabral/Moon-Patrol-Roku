@@ -14,7 +14,9 @@ Sub Main()
     'Constants
     m.code = bslUniversalControlEventCodes()
     m.const = GetConstants()
-    m.colors = {black: &hFF, white: &hFFFFFFFF, darkgray: &h0F0F0FFF, red: &hFF0000FF, green: &h00FF00FF, blue: &h0000FFFF, cyan: &h00FFFFFF, yellow: &hFFD800FF}
+    m.colors = {black: &hFF, white: &hFFFFFFFF, darkgray: &h0F0F0FFF,
+                red: &hFF0000FF, green: &h00FF00FF, blue: &h0021FFFF,
+                cyan: &h00B8FFFF, yellow: &hFFFF00FF, orange: &hFF9751FF}
     'Util objects
     app = CreateObject("roAppManager")
     app.SetTheme(GetTheme())
@@ -23,7 +25,7 @@ Sub Main()
     m.audioPlayer = CreateObject("roAudioPlayer")
     m.audioPort = CreateObject("roMessagePort")
     m.audioPlayer.SetMessagePort(m.audioPort)
-    m.sounds = LoadSounds(false)
+    m.sounds = LoadSounds(true)
     m.fonts = CreateObject("roFontRegistry")
     m.fonts.Register("pkg:/assets/fonts/PressStart2P.ttf")
     m.gameFont = m.fonts.getFont("Press Start 2P", 16, false, false)
@@ -42,41 +44,23 @@ Sub Main()
             m.highScore = m.settings.highScores[0].score
             m.currentLevel = 1
             m.currentStage = 1
+            m.showBase = true
             LoadGameSprites()
             ResetGame()
-            GameLogo(5000)
+            GameLogo(3000)
             PlayGame()
         else if selection = m.const.MENU_HISCORES
-            'ShowHighScores()
+            ShowHighScores()
         else if selection = m.const.MENU_CREDITS
             ShowCredits()
         end if
     end while
 End Sub
 
-Sub GameLogo(waitTime as integer)
-    Sleep(500) ' Give time to Roku clear list screen from memory
-    ticks = m.clock.TotalMilliseconds()
-    m.mainScreen.Clear(m.colors.black)
-    m.mainScreen.SwapBuffers()
-    if m.moon = invalid then m.moon = {}
-    rgn = m.regions.Lookup("game-logo")
-    m.moon.top = m.compositor.NewSprite(0, 0, rgn, m.const.LAYER2_Z)
-    DrawMoon()
-    m.compositor.AnimationTick(ticks)
-    m.compositor.DrawAll()
-    m.mainScreen.SwapBuffers()
-	while true
-    	key = wait(waitTime, m.port)
-		if key = invalid or key < 100 then exit while
-	end while
-End Sub
-
 Sub ResetGame()
     g = GetGlobalAA()
     print "Reseting Stage "; itostr(g.currentStage)
-    if g.moon = invalid then g.moon = {}
-    if g.moon.layers <> invalid then DestroyMoon()
+    if g.moon = invalid then g.moon = {xOff: 0} else g.moon.xOff = 0
     'Update moon landscape
     if g.moon.landscape = g.const.MOON_MOUNTAIN
         g.moon.landscape = g.const.MOON_CITY
@@ -90,20 +74,40 @@ Sub ResetGame()
     StopSound()
 End Sub
 
+Sub GameLogo(waitTime as integer)
+    Sleep(500) ' Give time to Roku clear list screen from memory
+    ticks = m.clock.TotalMilliseconds()
+    m.mainScreen.Clear(m.colors.black)
+    m.mainScreen.SwapBuffers()
+    rgn = m.regions.images.Lookup("game-logo")
+    m.moon.top = m.compositor.NewSprite(0, 0, rgn, m.const.LAYER2_Z)
+    DrawMoon()
+    m.compositor.AnimationTick(ticks)
+    m.compositor.DrawAll()
+    m.mainScreen.SwapBuffers()
+	while true
+    	key = wait(waitTime, m.port)
+		if key = invalid or key < 100 then exit while
+	end while
+End Sub
+
 Sub LoadGameSprites()
-    if m.regions = invalid then m.regions = {}
-    path = "pkg:/assets/images/"
+    if m.regions = invalid then m.regions = {images: {}, sprites: {}}
     if m.settings.spriteMode = m.const.MODE_ARCADE
-        path += "arcade/"
+        mode = "arcade"
     else
-        path += "atari/"
+        mode = "atari"
     end if
-    m.regions.AddReplace("game-logo", GetRegion(path + "game-logo.png"))
-    m.regions.AddReplace("score-board", GetRegion(path + "score-board.png"))
-    m.regions.AddReplace("back-mountain", GetRegion(path + "back-mountain.png", true))
-    m.regions.AddReplace("front-mountain", GetRegion(path + "front-mountain.png", true))
-    m.regions.AddReplace("front-city", GetRegion(path + "front-city.png", true))
-    m.regions.AddReplace("ground-level", GetRegion(path + "ground-level.png", true))
+    'Load images
+    path = "pkg:/assets/images/" + mode
+    m.regions.images.AddReplace("game-logo", GetRegion(path + "/game-logo.png"))
+    m.regions.images.AddReplace("score-board", GetRegion(path + "/score-board.png"))
+    m.regions.images.AddReplace("back-mountain", GetRegion(path + "/back-mountain.png", true))
+    m.regions.images.AddReplace("front-mountain", GetRegion(path + "/front-mountain.png", true))
+    m.regions.images.AddReplace("front-city", GetRegion(path + "/front-city.png", true))
+    'Load sprites
+    path = "pkg:/assets/sprites/"
+    m.regions.sprites = LoadBitmapRegions(path, mode)
 End Sub
 
 Sub SetupGameScreen()

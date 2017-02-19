@@ -14,6 +14,15 @@ Function StartMenu(focus as integer) as integer
             screen: CreateObject("roListScreen")
             port: CreateObject("roMessagePort")
            }
+    'Cache HighScore bitmap
+    if m.scoresChanged = invalid or m.scoresChanged
+        print "caching high scores"
+        bmp = GetHighScoreBitmap()
+        png = bmp.GetPng(0, 0, bmp.GetWidth(), bmp.GetHeight())
+        png.WriteFile("tmp:/high_scores.png")
+        m.scoresChanged = false
+    end if
+    'Draw Menu
     this.screen.SetMessagePort(this.port)
     this.screen.SetHeader("Game Menu")
     this.controlModes = ["Vertical Mode", "Horizontal Mode"]
@@ -123,8 +132,8 @@ Function GetMenuItems(menu as object)
                 Title: "High Scores"
                 HDSmallIconUrl: "pkg:/images/icon_hiscores.png"
                 SDSmallIconUrl: "pkg:/images/icon_hiscores.png"
-                HDPosterUrl: "pkg:/images/menu_high_scores.png"
-                SDPosterUrl: "pkg:/images/menu_high_scores.png"
+                HDPosterUrl: "tmp:/high_scores.png"
+                SDPosterUrl: "tmp:/high_scores.png"
                 ShortDescriptionLine1: "Use of cheat keys during the game disables high score record"
                 ShortDescriptionLine2: "Press OK to open High Scores"
                 })
@@ -147,20 +156,11 @@ Sub ShowHighScores(waitTime = 0 as integer)
         screen.Clear(m.colors.black)
         screen.SwapBuffers()
     end if
-    'Draw Screen
-    bmp = CreateObject("roBitmap", "pkg:/images/frame_high_scores.png")
-    centerX = Cint((bmp.GetWidth() - m.gameFont.GetOneLineWidth("HIGH SCORES", bmp.GetWidth())) / 2)
-    bmp.DrawText("HIGH SCORES", centerX, 90, m.colors.red, m.gameFont)
-    centerX = Cint((bmp.GetWidth() - m.gameFont.GetOneLineWidth("RANK  SCORE  NAME", bmp.GetWidth())) / 2)
-    hs = m.settings.highScores
-    bmp.DrawText("RANK  SCORE  NAME", centerX, 140, m.colors.cyan, m.gameFont)
-    bmp.DrawText("1ST  " + zeroPad(hs[0].score, 6) + "  " + hs[0].name, centerX, 170, m.colors.red, m.gameFont)
-    bmp.DrawText("2ND  " + zeroPad(hs[1].score, 6) + "  " + hs[1].name, centerX, 200, m.colors.red, m.gameFont)
-    bmp.DrawText("3RD  " + zeroPad(hs[2].score, 6) + "  " + hs[2].name, centerX, 230, m.colors.red, m.gameFont)
-    bmp.DrawText("4TH  " + zeroPad(hs[3].score, 6) + "  " + hs[3].name, centerX, 260, m.colors.yellow, m.gameFont)
-    bmp.DrawText("5TH  " + zeroPad(hs[4].score, 6) + "  " + hs[4].name, centerX, 290, m.colors.yellow, m.gameFont)
-    centerX = Cint((bmp.GetWidth() - m.gameFont.GetOneLineWidth("ANY KEY TO RETURN", bmp.GetWidth())) / 2)
-    bmp.DrawText("ANY KEY TO RETURN", centerX, 340, m.colors.green, m.gameFont)
+    scoreFont = m.fonts.getFont("Press Start 2P", 14, false, false)
+    bmp = CreateObject("roBitmap", "tmp:/high_scores.png")
+    message = "PRESS ANY KEY TO RETURN"
+    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(message, bmp.GetWidth())) / 2)
+    bmp.DrawText(message, centerX, 370, m.colors.white, scoreFont)
     'Paint screen
     centerX = Cint((screen.GetWidth() - bmp.GetWidth()) / 2)
     centerY = Cint((screen.GetHeight() - bmp.GetHeight()) / 2)
@@ -192,3 +192,29 @@ Sub ShowCredits(waitTime = 0 as integer)
 		if key = invalid or key < 100 then exit while
 	end while
 End Sub
+
+Function GetHighScoreBitmap() as object
+    scoreFont = m.fonts.getFont("Press Start 2P", 14, false, false)
+    bmp = CreateObject("roBitmap", "pkg:/images/frame_high_scores.png")
+    title = "TOP   SCORES"
+    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(title, bmp.GetWidth())) / 2)
+    bmp.DrawText(title, centerX, 100, m.colors.cyan, scoreFont)
+    bmp.DrawText("    5", centerX, 100, m.colors.white, scoreFont)
+    header = "NO. POINT  SCORE   INITIALS"
+    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(header, bmp.GetWidth())) / 2)
+    hs = m.settings.highScores
+    bmp.DrawText(header, centerX, 130, m.colors.white, scoreFont)
+    for i = 0 to 4
+        y = 160 + i * 25
+        score = Str(i + 1) + "         " + zeroPad(hs[i].score, 6)
+        bmp.DrawText(score, centerX, y, m.colors.yellow, scoreFont)
+        if hs[i].point <> ""
+            score = "      " + hs[i].point + "              " + hs[i].name
+            bmp.DrawText(score, centerX, y, m.colors.orange, scoreFont)
+        else
+            bmp.DrawRect(centerX + 6 * 14, y, 14, 14, m.colors.cyan)
+        end if
+    next
+    bmp.Finish()
+    return bmp
+End Function

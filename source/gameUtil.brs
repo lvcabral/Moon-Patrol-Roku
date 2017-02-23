@@ -30,6 +30,8 @@ Function GetConstants() as object
     const.PANEL_WIDTH      = 640
     const.PANEL_HEIGHT     = 160
 
+    const.TERRAIN_WIDTH    = 1280
+
     const.MENU_START    = 0
     const.MENU_CONTROL  = 1
     const.MENU_SPRITES  = 2

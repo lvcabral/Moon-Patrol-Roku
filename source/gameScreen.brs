@@ -138,8 +138,8 @@ Sub MoonUpdate()
     next
     m.moon.xOff += m.moon.layers[2].speed
     if m.moon.xOff >= m.moon.layers[2].region.GetWidth()
-        print "finished layer 2"
-        m.moon.xOff = 0
+        print "finished layer 2"; m.moon.xOff
+        m.moon.xOff -= m.moon.layers[2].region.GetWidth()
     end if
 
     if m.moon.base <> invalid
@@ -150,11 +150,6 @@ Sub MoonUpdate()
             print "base sprite destroyed"
         end if
     end if
-End Sub
-
-Sub BuggyStartup()
-
-    m.startup = false
 End Sub
 
 Sub BuggyUpdate()
@@ -204,13 +199,13 @@ Sub BuggyUpdate()
 
             wx = m.buggy.wheels[0].GetX()
             idx = wx + ww + m.moon.xOff
-            if idx > m.terrain.Count() - 1 then idx -= m.terrain.Count()
+            if idx > m.const.TERRAIN_WIDTH - 1 then idx -= m.const.TERRAIN_WIDTH
             wy = m.buggy.y + 46 - wh + m.terrain[idx]
             m.buggy.wheels[0].MoveTo(wx, wy)
 
             wx = m.buggy.wheels[1].GetX()
             idx = wx + ww + m.moon.xOff
-            if idx > m.terrain.Count() - 1 then idx -= m.terrain.Count()
+            if idx > m.const.TERRAIN_WIDTH - 1 then idx -= m.const.TERRAIN_WIDTH
             wy = m.buggy.y + 46 - wh + m.terrain[idx]
             m.buggy.wheels[1].MoveTo(wx, wy)
 
@@ -219,7 +214,7 @@ Sub BuggyUpdate()
 
             wx = m.buggy.wheels[2].GetX()
             idx = wx + ww + m.moon.xOff
-            if idx > m.terrain.Count() - 1 then idx -= m.terrain.Count()
+            if idx > m.const.TERRAIN_WIDTH - 1 then idx -= m.const.TERRAIN_WIDTH
             wy = m.buggy.y + 46 - wh + m.terrain[idx]
             m.buggy.wheels[2].MoveTo(wx, wy)
         end if

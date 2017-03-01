@@ -1,8 +1,16 @@
 {"frames": {
 
+"alien-1":
+{
+	"frame": {"x":0,"y":0,"w":30,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":16},
+	"sourceSize": {"w":30,"h":16}
+},
 "base":
 {
-	"frame": {"x":0,"y":0,"w":262,"h":70},
+	"frame": {"x":0,"y":16,"w":262,"h":70},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":262,"h":70},
@@ -10,15 +18,119 @@
 },
 "buggy-1":
 {
-	"frame": {"x":262,"y":0,"w":64,"h":38},
+	"frame": {"x":0,"y":86,"w":64,"h":38},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":38},
 	"sourceSize": {"w":64,"h":38}
 },
+"buggy-2":
+{
+	"frame": {"x":64,"y":86,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"buggy-3":
+{
+	"frame": {"x":128,"y":86,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"hole-1":
+{
+	"frame": {"x":0,"y":150,"w":84,"h":74},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":84,"h":74},
+	"sourceSize": {"w":84,"h":74}
+},
+"hole-2":
+{
+	"frame": {"x":84,"y":150,"w":64,"h":42},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":42},
+	"sourceSize": {"w":64,"h":42}
+},
+"hole-3":
+{
+	"frame": {"x":148,"y":150,"w":64,"h":42},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":42},
+	"sourceSize": {"w":64,"h":42}
+},
+"soucer-1":
+{
+	"frame": {"x":212,"y":150,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"soucer-2":
+{
+	"frame": {"x":0,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"soucer-3":
+{
+	"frame": {"x":32,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"tank-1":
+{
+	"frame": {"x":64,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"triball-1":
+{
+	"frame": {"x":96,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"triball-2":
+{
+	"frame": {"x":128,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"triball-3":
+{
+	"frame": {"x":160,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"triball-4":
+{
+	"frame": {"x":192,"y":224,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
 "wheel-1":
 {
-	"frame": {"x":326,"y":0,"w":16,"h":18},
+	"frame": {"x":224,"y":224,"w":16,"h":18},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":18},
@@ -26,7 +138,7 @@
 },
 "wheel-2":
 {
-	"frame": {"x":342,"y":0,"w":16,"h":18},
+	"frame": {"x":240,"y":224,"w":16,"h":18},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":18},
@@ -34,7 +146,7 @@
 },
 "wheel-3":
 {
-	"frame": {"x":358,"y":0,"w":12,"h":16},
+	"frame": {"x":256,"y":224,"w":12,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":12,"h":16},
@@ -42,7 +154,7 @@
 },
 "wheel-4":
 {
-	"frame": {"x":370,"y":0,"w":12,"h":16},
+	"frame": {"x":0,"y":256,"w":12,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":12,"h":16},
@@ -53,8 +165,8 @@
 	"version": "1.0",
 	"image": "arcade.png",
 	"format": "RGBA8888",
-	"size": {"w":382,"h":70},
+	"size": {"w":272,"h":272},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:6332c60726c5a57b838671378d16296f:abb895700bf80da3625ec52770116fd2:4ac60fa2f64b1c7a4d1a5080df2ca848$"
+	"smartupdate": "$TexturePacker:SmartUpdate:5df61b202449c2ff09aab07e646c7327:4bfdfdd49990b2905a55a41a611f73ee:4ac60fa2f64b1c7a4d1a5080df2ca848$"
 }
 }

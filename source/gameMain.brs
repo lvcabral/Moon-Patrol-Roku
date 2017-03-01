@@ -59,14 +59,17 @@ End Sub
 
 Sub ResetGame()
     g = GetGlobalAA()
-    print "Reseting Stage "; itostr(g.currentStage)
-    if g.moon = invalid then g.moon = {xOff: 0} else g.moon.xOff = 0
+    print "Reseting Stage "; g.currentStage
+    if g.moon = invalid then g.moon = {xOff: 0, holes: []} else g.moon.xOff = 0
     'Update moon landscape
-    if g.moon.landscape = g.const.MOON_MOUNTAIN
+    if g.moon.landscape = g.const.MOON_HILLS
         g.moon.landscape = g.const.MOON_CITY
     else
-        g.moon.landscape = g.const.MOON_MOUNTAIN
+        g.moon.landscape = g.const.MOON_HILLS
     end if
+    g.moon.holes.Push({x: 1000, size: 1})
+    g.moon.holes.Push({x: 1300, size: 2})
+    g.moon.holes.Push({x: 1700, size: 3})
     'Create Buggy
     'if g.buggy = invalid then g.buggy = CreateBuggy()
     m.startup = true
@@ -102,8 +105,8 @@ Sub LoadGameSprites()
     path = "pkg:/assets/images/" + mode
     m.regions.images.AddReplace("game-logo", GetRegion(path + "/game-logo.png"))
     m.regions.images.AddReplace("score-board", GetRegion(path + "/score-board.png"))
-    m.regions.images.AddReplace("back-mountain", GetRegion(path + "/back-mountain.png", true))
-    m.regions.images.AddReplace("front-mountain", GetRegion(path + "/front-mountain.png", true))
+    m.regions.images.AddReplace("back-mountains", GetRegion(path + "/back-mountains.png", true))
+    m.regions.images.AddReplace("front-hills", GetRegion(path + "/front-hills.png", true))
     m.regions.images.AddReplace("front-city", GetRegion(path + "/front-city.png", true))
     'Load sprites
     path = "pkg:/assets/sprites/"

@@ -1,4 +1,8 @@
-#####v0.2 - 19-Feb-2017 - Buggy animation
+#####v0.3 - Buggy Jump, Holes
+* Add: Holes sprites
+- Add: Buggy Control: Jump
+
+#####v0.2 - 19-Feb-2017 - Buggy animation, Terrain Generation
 * Add: Buggy and Wheels animation
 * Add: Basic Terrain generation
 * Add: Start over Lunar base

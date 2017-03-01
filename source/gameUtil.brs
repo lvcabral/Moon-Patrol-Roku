@@ -16,21 +16,22 @@ Function GetConstants() as object
     const.MODE_ARCADE = 0
     const.MODE_ATARI  = 1
 
-    const.MOON_MOUNTAIN = 0
-    const.MOON_CITY     = 1
+    const.MOON_HILLS = 0
+    const.MOON_CITY  = 1
 
     const.COURSE_BEGGINER = 0
     const.COURSE_CHAMPION = 1
 
-    const.BACK_MOUNTAIN_Y  = 188
-    const.FRONT_MOUNTAIN_Y = 258
+    const.BACK_MOUNTAINS_Y = 188
+    const.FRONT_HILLS_Y    = 258
     const.FRONT_CITY_Y     = 256
     const.GROUND_LEVEL_Y   = 320
+    const.GROUND_OFFSET_Y  = 84
 
     const.PANEL_WIDTH      = 640
     const.PANEL_HEIGHT     = 160
 
-    const.TERRAIN_WIDTH    = 1280
+    const.TERRAIN_WIDTH    = 2000
 
     const.MENU_START    = 0
     const.MENU_CONTROL  = 1
@@ -89,7 +90,8 @@ Function GetTerrain(width as integer) as object
         tColor = m.colors.yellow
     end if
     bmp = CreateObject("roBitmap", {width:width, height:m.const.PANEL_HEIGHT, alphaenable:true})
-    bmp.DrawRect(0, 96, bmp.GetWidth(), 64, gColor)
+    height = m.const.PANEL_HEIGHT - m.const.GROUND_OFFSET_Y
+    bmp.DrawRect(0, m.const.GROUND_OFFSET_Y, bmp.GetWidth(), height, gColor)
     c = 0
     depth = (Rnd(5) - 1) * 2
     s = 0
@@ -111,7 +113,7 @@ Function GetTerrain(width as integer) as object
         depth += move
         wide = (Rnd(4) + 1) * 2
         if depth > 0
-            bmp.DrawRect(c, 96, wide, depth, mColor)
+            bmp.DrawRect(c, m.const.GROUND_OFFSET_Y, wide, depth, mColor)
         end if
         for t = 1 to wide
             m.terrain.Push(depth)
@@ -169,31 +171,16 @@ End Function
 
 '------- Numeric and String Functions -------
 
-Function itostr(i as integer) as string
-    str = Stri(i)
-    return strTrim(str)
-End Function
-
-Function strTrim(str as String) as string
-    st = CreateObject("roString")
-    st.SetString(str)
-    return st.Trim()
-End Function
-
-Function zeroPad(number as integer, length = invalid) as string
-    text = itostr(number)
-    if length = invalid then length = 2
-    if text.Len() < length
-        for i = 1 to length-text.Len()
-            text = "0" + text
-        next
-    end if
+Function zeroPad(number as integer, length = 2 as integer) as string
+    text = number.ToStr()
+    if text.Len() < length then text = String(length-text.Len(), "0") + text
     return text
 End Function
 
 Function padCenter(text as string, size as integer) as string
-    if Len(text) > size then text.Left(text, size)
-    if Len(text) < size
+    if Len(text) > size
+        return text.Left(size)
+    else if Len(text) < size
         left = ""
         right = ""
         for c = 1 to size - Len(text)
@@ -209,11 +196,10 @@ Function padCenter(text as string, size as integer) as string
 End Function
 
 Function padLeft(text as string, size as integer) as string
-    if Len(text) > size then text.Left(text, size)
-    if Len(text) < size
-        for c = 1 to size - Len(text)
-            text += " "
-        next
+    if Len(text) > size
+        return text.Left(size)
+    else if Len(text) < size
+        text += String(size - Len(text), 32)
     end if
     return text
 End Function

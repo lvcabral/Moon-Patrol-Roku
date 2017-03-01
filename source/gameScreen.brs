@@ -94,26 +94,36 @@ End Sub
 Sub DrawMoon()
     if m.moon.layers <> invalid then DestroyMoon()
     m.moon.layers = [{speed: 1}, {speed: 3}, {speed: 6}]
-    m.moon.layers[0].region = m.regions.images.Lookup("back-mountain")
-    m.moon.layers[0].sprite = m.compositor.NewSprite(0, m.const.BACK_MOUNTAIN_Y, m.moon.layers[0].region , m.const.LAYER0_Z)
-    if m.moon.landscape = m.const.MOON_MOUNTAIN
-        m.moon.layers[1].region = m.regions.images.Lookup("front-mountain")
-        m.moon.layers[1].sprite = m.compositor.NewSprite(0, m.const.FRONT_MOUNTAIN_Y, m.moon.layers[1].region, m.const.LAYER1_Z)
+    m.moon.layers[0].region = m.regions.images.Lookup("back-mountains")
+    m.moon.layers[0].sprite = m.compositor.NewSprite(0, m.const.BACK_MOUNTAINS_Y, m.moon.layers[0].region , m.const.LAYER0_Z)
+    if m.moon.landscape = m.const.MOON_HILLS
+        m.moon.layers[1].region = m.regions.images.Lookup("front-hills")
+        m.moon.layers[1].sprite = m.compositor.NewSprite(0, m.const.FRONT_HILLS_Y, m.moon.layers[1].region, m.const.LAYER1_Z)
     else
         m.moon.layers[1].region = m.regions.images.Lookup("front-city")
         m.moon.layers[1].sprite = m.compositor.NewSprite(0, m.const.FRONT_CITY_Y, m.moon.layers[1].region, m.const.LAYER1_Z)
     end if
-    bmp = GetTerrain(1280)
+    bmp = GetTerrain(m.const.TERRAIN_WIDTH)
     rgn = CreateObject("roRegion", bmp, 0, 0, bmp.GetWidth(), bmp.GetHeight())
     rgn.SetWrap(true)
     m.moon.layers[2].region = rgn
     m.moon.layers[2].sprite = m.compositor.NewSprite(0, m.const.GROUND_LEVEL_Y, m.moon.layers[2].region, m.const.LAYER2_Z)
     'Draw base
+    y = m.const.GROUND_LEVEL_Y + m.const.GROUND_OFFSET_Y
+    z = m.const.LAYER2_Z + 1
     if m.showBase
         if m.moon.base <> invalid then m.moon.base.Remove()
-        m.moon.base = m.compositor.NewSprite(64, 368, m.regions.sprites.Lookup("base"), m.const.LAYER2_Z + 1)
+        x = 64
+        m.moon.base = m.compositor.NewSprite(x, y - 48, m.regions.sprites.Lookup("base"), z)
         BuggyUpdate()
     end if
+    'Draw holes
+    y -= 8
+    for h = 0 to m.moon.holes.Count() - 1
+        hrg = m.regions.sprites.Lookup("hole-" + m.moon.holes[h].size.ToStr())
+        x = m.moon.holes[h].x
+        m.moon.holes[h].sprite = m.compositor.NewSprite(x, y + m.terrain[x], hrg, z)
+    next
 End Sub
 
 Sub DrawScore()
@@ -129,7 +139,7 @@ Sub DrawMessage()
     text = "BEGINNER COURSE GO !"
     width = m.gameScreen.GetWidth()
     centerX = Cint(( width - m.gameFont.GetOneLineWidth(text, width)) / 2)
-    m.gameScreen.DrawText(text, centerX, 150, m.colors.white, m.gameFont)
+    m.gameScreen.DrawText(text, centerX, 140, m.colors.white, m.gameFont)
 End Sub
 
 Sub MoonUpdate()
@@ -150,12 +160,22 @@ Sub MoonUpdate()
             print "base sprite destroyed"
         end if
     end if
+    for each hole in m.moon.holes
+        if hole.sprite <> invalid
+            hole.sprite.MoveOffset(-m.moon.layers[2].speed, 0)
+            if hole.sprite.GetX() + 64 < 0
+                hole.sprite.Remove()
+                hole.sprite = invalid
+            end if
+        end if
+    next
 End Sub
 
 Sub BuggyUpdate()
     'Draw Buggy
     if m.buggy = invalid
-        m.buggy = {x: 144, y: 371, yOff: 10, shake: 0, wheels: []}
+        gy = m.const.GROUND_LEVEL_Y + m.const.GROUND_OFFSET_Y
+        m.buggy = {x: 144, y: gy - 45, yOff: 10, shake: 0, wheels: []}
         rgn = m.regions.sprites.Lookup("buggy-1")
         bx = m.buggy.x
         by = m.buggy.y - m.buggy.yOff
@@ -255,6 +275,12 @@ Sub DestroyMoon()
         m.moon.base.Remove()
         m.moon.base = invalid
     end if
+    for each hole in m.moon.holes
+        if hole.sprite <> invalid
+            hole.sprite.Remove()
+            hole.sprite = invalid
+        end if
+    next
 End Sub
 
 Sub DestroyBuggy()

@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: February 2017
+' **  Updated: March 2017
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -29,11 +29,13 @@ Sub Main()
     m.fonts = CreateObject("roFontRegistry")
     m.fonts.Register("pkg:/assets/fonts/PressStart2P.ttf")
     m.gameFont = m.fonts.getFont("Press Start 2P", 16, false, false)
+    m.smallFont = m.fonts.getFont("Press Start 2P", 14, false, false)
     m.manifest = GetManifestArray()
     m.settings = LoadSettings()
     m.isOpenGL = isOpenGL()
     m.speed = m.const.GAME_SPEED
     selection = m.const.MENU_START
+    LoadAnimations()
     SetupGameScreen()
     'Main Menu Loop
     while true
@@ -42,8 +44,8 @@ Sub Main()
             print "Starting game..."
             m.gameScore = 0
             m.highScore = m.settings.highScores[0].score
-            m.currentLevel = 1
-            m.currentStage = 1
+            m.currentCourse = 0
+            m.currentStage = 0
             m.showBase = true
             LoadGameSprites()
             ResetGame()
@@ -59,7 +61,7 @@ End Sub
 
 Sub ResetGame()
     g = GetGlobalAA()
-    print "Reseting Stage "; g.currentStage
+    print "Reseting Course/Stage "; g.currentCourse; "/"; Chr(g.currentStage + 64)
     if g.moon = invalid then g.moon = {xOff: 0, holes: []} else g.moon.xOff = 0
     'Update moon landscape
     if g.moon.landscape = g.const.MOON_HILLS
@@ -73,6 +75,7 @@ Sub ResetGame()
     'Create Buggy
     'if g.buggy = invalid then g.buggy = CreateBuggy()
     m.startup = true
+    m.time = 0
     StopAudio()
     StopSound()
 End Sub
@@ -83,7 +86,7 @@ Sub GameLogo(waitTime as integer)
     m.mainScreen.Clear(m.colors.black)
     m.mainScreen.SwapBuffers()
     rgn = m.regions.images.Lookup("game-logo")
-    m.moon.top = m.compositor.NewSprite(0, 0, rgn, m.const.LAYER2_Z)
+    top = m.compositor.NewSprite(0, 0, rgn, m.const.LAYER2_Z)
     DrawMoon()
     m.compositor.AnimationTick(ticks)
     m.compositor.DrawAll()
@@ -92,6 +95,7 @@ Sub GameLogo(waitTime as integer)
     	key = wait(waitTime, m.port)
 		if key = invalid or key < 100 then exit while
 	end while
+    top.Remove()
 End Sub
 
 Sub LoadGameSprites()
@@ -104,13 +108,21 @@ Sub LoadGameSprites()
     'Load images
     path = "pkg:/assets/images/" + mode
     m.regions.images.AddReplace("game-logo", GetRegion(path + "/game-logo.png"))
-    m.regions.images.AddReplace("score-board", GetRegion(path + "/score-board.png"))
+    m.regions.images.AddReplace("score-board-0", GetRegion(path + "/score-board-0.png"))
+    m.regions.images.AddReplace("score-board-1", GetRegion(path + "/score-board-1.png"))
     m.regions.images.AddReplace("back-mountains", GetRegion(path + "/back-mountains.png", true))
     m.regions.images.AddReplace("front-hills", GetRegion(path + "/front-hills.png", true))
     m.regions.images.AddReplace("front-city", GetRegion(path + "/front-city.png", true))
     'Load sprites
     path = "pkg:/assets/sprites/"
     m.regions.sprites = LoadBitmapRegions(path, mode)
+End Sub
+
+Sub LoadAnimations()
+    if m.anims = invalid then m.anims = {}
+    if m.anims.buggy = invalid
+        m.anims.buggy = ParseJson(ReadAsciiFile("pkg:/assets/anims/buggy.json"))
+    end if
 End Sub
 
 Sub SetupGameScreen()

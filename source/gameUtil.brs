@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: February 2017
+' **  Updated: March 2017
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -19,8 +19,13 @@ Function GetConstants() as object
     const.MOON_HILLS = 0
     const.MOON_CITY  = 1
 
-    const.COURSE_BEGGINER = 0
+    const.COURSE_BEGINNER = 0
     const.COURSE_CHAMPION = 1
+
+    const.BUGGY_DRIVE        = 0
+    const.BUGGY_JUMP         = 1
+    const.BUGGY_CRASH_FRONT  = 2
+    const.BUGGY_CRASH_BACK   = 3
 
     const.BACK_MOUNTAINS_Y = 188
     const.FRONT_HILLS_Y    = 258
@@ -31,7 +36,8 @@ Function GetConstants() as object
     const.PANEL_WIDTH      = 640
     const.PANEL_HEIGHT     = 160
 
-    const.TERRAIN_WIDTH    = 2000
+    const.TERRAIN_WIDTH    = 1920
+    const.TERRAIN_LIMIT    = 1280
 
     const.MENU_START    = 0
     const.MENU_CONTROL  = 1
@@ -76,26 +82,45 @@ Function GetRegion(image as string, wrap = false as boolean) as object
     return rgn
 End Function
 
-Function GetTerrain(width as integer) as object
-    font = m.fonts.getFont("Press Start 2P", 14, false, false)
+Function GetAnimation(animations as object, regions as object, name as string, sequence as string) as object
+    actions = animations.Lookup(sequence)
+    anim = []
+    for each action in actions
+        frame = regions.Lookup(name + "-" + action.id.ToStr())
+        if action.t <> invalid then frame.SetTime(action.t)
+        anim.Push(frame)
+    next
+    return anim
+End Function
+
+Function GetTerrain(width as integer, label = "" as string, continue = false as boolean) as object
     if m.settings.spriteMode = m.const.MODE_ARCADE
         mColor = &h00DE51FF
         gColor = &hFF9751FF
-        bColor = mColor
-        tColor = &h210000FF
     else
         mColor = &h00A000FF
         gColor = &hC06000FF
-        bColor = gColor
-        tColor = m.colors.yellow
     end if
+    ' Enable for debug
+    ' if m.ct = invalid then m.ct = 0
+    ' if IsOdd(m.ct) then gColor = m.colors.cyan else gColor = m.colors.blue
+    ' m.ct++
     bmp = CreateObject("roBitmap", {width:width, height:m.const.PANEL_HEIGHT, alphaenable:true})
     height = m.const.PANEL_HEIGHT - m.const.GROUND_OFFSET_Y
     bmp.DrawRect(0, m.const.GROUND_OFFSET_Y, bmp.GetWidth(), height, gColor)
     c = 0
-    depth = (Rnd(5) - 1) * 2
+    if continue
+        depth = m.terrain[m.terrain.Count() - 1]
+        for i = 1 to width
+            m.terrain.Delete(0)
+        next
+        max = width + m.terrain.Count()
+    else
+        depth = (Rnd(5) - 1) * 2
+        m.terrain = []
+        max = width
+    end if
     s = 0
-    m.terrain = []
     ap = [6, 6, 6, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 12, 12, 12]
     while c < width
         if s <= 0
@@ -116,16 +141,37 @@ Function GetTerrain(width as integer) as object
             bmp.DrawRect(c, m.const.GROUND_OFFSET_Y, wide, depth, mColor)
         end if
         for t = 1 to wide
-            m.terrain.Push(depth)
+            if m.terrain.Count() < max then m.terrain.Push(depth)
         next
         s -= wide
         c += wide
     end while
     print "terrain array size = "; m.terrain.Count()
-    bmp.DrawRect(bmp.GetWidth() - 32, bmp.GetHeight() - 30, 16, 16, bColor)
-    bmp.DrawText("A", bmp.GetWidth() - 30, bmp.GetHeight() - 28, tColor, font)
     bmp.Finish()
     return bmp
+End Function
+
+Function UpdateTerrain(old as object, new as object, label = "" as string) as object
+    if m.settings.spriteMode = m.const.MODE_ARCADE
+        bColor = &h00DE51FF
+        tColor = &h210000FF
+    else
+        bColor = &hC06000FF
+        tColor = m.colors.yellow
+    end if
+    width = old.GetWidth()
+    height = old.GetHeight()
+    span = new.GetWidth()
+    out = CreateObject("roBitmap",{width:width, height:height, alphaenable:old.GetAlphaEnable()})
+    region = CreateObject("roRegion", old, span, 0, width-span, height)
+    out.DrawObject(0, 0, region)
+    out.DrawObject(width-span, 0, new)
+    if label <> ""
+        out.DrawRect(width-span, out.GetHeight() - 30, 16, 16, bColor)
+        out.DrawText(label, width - span + 2, out.GetHeight() - 28, tColor, m.smallFont)
+    end if
+    out.Finish()
+    return out
 End Function
 
 '------- Registry Functions -------
@@ -241,3 +287,89 @@ Function GetManifestArray() as Object
     print aa
     return aa
 End Function
+
+'------- Remote Control Functions -------
+
+Function GetControl(controlMode as integer) as object
+    this = {
+            code: bslUniversalControlEventCodes()
+            left: false
+            right: false
+            fire: false
+            jump: false
+           }
+    if controlMode = m.const.CONTROL_VERTICAL
+        this.update = update_control_vertical
+    else
+        this.update = update_control_horizontal
+    end if
+    this.reset = reset_control
+    return this
+End Function
+
+Sub update_control_vertical(id as integer)
+    if id = m.code.BUTTON_UP_PRESSED
+        m.jump = true
+    else if id = m.code.BUTTON_A_PRESSED
+        m.jump = true
+    else if id = m.code.BUTTON_LEFT_PRESSED
+        m.left = true
+        m.right = false
+    else if id = m.code.BUTTON_RIGHT_PRESSED
+        m.left = false
+        m.right = true
+    else if id = m.code.BUTTON_SELECT_PRESSED
+        m.fire = true
+    else if id = m.code.BUTTON_B_PRESSED
+        m.fire = true
+    else if id = m.code.BUTTON_UP_RELEASED
+        m.jump = false
+    else if id = m.code.BUTTON_A_RELEASED
+        m.jump = false
+    else if id = m.code.BUTTON_LEFT_RELEASED
+        m.left = false
+    else if id = m.code.BUTTON_RIGHT_RELEASED
+        m.right = false
+    else if id = m.code.BUTTON_SELECT_RELEASED
+        m.fire = false
+    else if id = m.code.BUTTON_B_RELEASED
+        m.fire = false
+    end if
+End Sub
+
+Sub update_control_horizontal(id as integer)
+    if id = m.code.BUTTON_RIGHT_PRESSED
+        m.jump = true
+    else if id = m.code.BUTTON_A_PRESSED
+        m.jump = true
+    else if id = m.code.BUTTON_UP_PRESSED
+        m.left = true
+        m.right = false
+    else if id = m.code.BUTTON_DOWN_PRESSED
+        m.left = false
+        m.right = true
+    else if id = m.code.BUTTON_SELECT_PRESSED
+        m.fire = true
+    else if id = m.code.BUTTON_B_PRESSED
+        m.fire = true
+    else if id = m.code.BUTTON_RIGHT_RELEASED
+        m.jump = false
+    else if id = m.code.BUTTON_A_RELEASED
+        m.jump = false
+    else if id = m.code.BUTTON_UP_RELEASED
+        m.left = false
+    else if id = m.code.BUTTON_DOWN_RELEASED
+        m.right = false
+    else if id = m.code.BUTTON_SELECT_RELEASED
+        m.fire = false
+    else if id = m.code.BUTTON_B_RELEASED
+        m.fire = false
+    end if
+End Sub
+
+Sub reset_control()
+    m.left = false
+    m.right = false
+    m.fire = false
+    m.jump = false
+End Sub

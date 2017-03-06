@@ -6,6 +6,18 @@
            "duration":25547,
            "priority":10
         },
+        "crash":
+        {
+           "type":"wav",
+           "duration":3062,
+           "priority":10
+        },
+        "jump":
+        {
+           "type":"wav",
+           "duration":1171,
+           "priority":10
+        },
         "start-course":
         {
            "type":"wav",

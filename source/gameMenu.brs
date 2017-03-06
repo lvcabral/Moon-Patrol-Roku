@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: February 2017
+' **  Updated: March 2017
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -156,11 +156,10 @@ Sub ShowHighScores(waitTime = 0 as integer)
         screen.Clear(m.colors.black)
         screen.SwapBuffers()
     end if
-    scoreFont = m.fonts.getFont("Press Start 2P", 14, false, false)
     bmp = CreateObject("roBitmap", "tmp:/high_scores.png")
     message = "PRESS ANY KEY TO RETURN"
-    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(message, bmp.GetWidth())) / 2)
-    bmp.DrawText(message, centerX, 370, m.colors.white, scoreFont)
+    centerX = Cint((bmp.GetWidth() - m.smallFont.GetOneLineWidth(message, bmp.GetWidth())) / 2)
+    bmp.DrawText(message, centerX, 370, m.colors.white, m.smallFont)
     'Paint screen
     centerX = Cint((screen.GetWidth() - bmp.GetWidth()) / 2)
     centerY = Cint((screen.GetHeight() - bmp.GetHeight()) / 2)
@@ -194,23 +193,22 @@ Sub ShowCredits(waitTime = 0 as integer)
 End Sub
 
 Function GetHighScoreBitmap() as object
-    scoreFont = m.fonts.getFont("Press Start 2P", 14, false, false)
     bmp = CreateObject("roBitmap", "pkg:/images/frame_high_scores.png")
     title = "TOP   SCORES"
-    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(title, bmp.GetWidth())) / 2)
-    bmp.DrawText(title, centerX, 100, m.colors.cyan, scoreFont)
-    bmp.DrawText("    5", centerX, 100, m.colors.white, scoreFont)
+    centerX = Cint((bmp.GetWidth() - m.smallFont.GetOneLineWidth(title, bmp.GetWidth())) / 2)
+    bmp.DrawText(title, centerX, 100, m.colors.cyan, m.smallFont)
+    bmp.DrawText("    5", centerX, 100, m.colors.white, m.smallFont)
     header = "NO. POINT  SCORE   INITIALS"
-    centerX = Cint((bmp.GetWidth() - scoreFont.GetOneLineWidth(header, bmp.GetWidth())) / 2)
+    centerX = Cint((bmp.GetWidth() - m.smallFont.GetOneLineWidth(header, bmp.GetWidth())) / 2)
     hs = m.settings.highScores
-    bmp.DrawText(header, centerX, 130, m.colors.white, scoreFont)
+    bmp.DrawText(header, centerX, 130, m.colors.white, m.smallFont)
     for i = 0 to 4
         y = 160 + i * 25
         score = Str(i + 1) + "         " + zeroPad(hs[i].score, 6)
-        bmp.DrawText(score, centerX, y, m.colors.yellow, scoreFont)
+        bmp.DrawText(score, centerX, y, m.colors.yellow, m.smallFont)
         if hs[i].point <> ""
             score = "      " + hs[i].point + "              " + hs[i].name
-            bmp.DrawText(score, centerX, y, m.colors.orange, scoreFont)
+            bmp.DrawText(score, centerX, y, m.colors.orange, m.smallFont)
         else
             bmp.DrawRect(centerX + 6 * 14, y, 14, 14, m.colors.cyan)
         end if

@@ -1,7 +1,7 @@
 title=Moon Patrol
 major_version=0
-minor_version=3
-build_version=450
+minor_version=4
+build_version=508
 mm_icon_focus_hd=pkg:/images/icon_focus_hd.png
 mm_icon_focus_sd=pkg:/images/icon_focus_hd.png
 screensaver_private=1

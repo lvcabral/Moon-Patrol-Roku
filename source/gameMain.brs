@@ -20,6 +20,7 @@ Sub Main()
     'Util objects
     app = CreateObject("roAppManager")
     app.SetTheme(GetTheme())
+    m.debug = false
     m.port = CreateObject("roMessagePort")
     m.clock = CreateObject("roTimespan")
     m.audioPlayer = CreateObject("roAudioPlayer")
@@ -62,18 +63,26 @@ End Sub
 Sub ResetGame()
     g = GetGlobalAA()
     print "Reseting Course/Stage "; g.currentCourse; "/"; Chr(g.currentStage + 64)
-    if g.moon = invalid then g.moon = {xOff: 0, holes: []} else g.moon.xOff = 0
+    if g.courses = invalid then g.courses = ParseJson(ReadAsciiFile("pkg:/assets/maps/arcade.json"))
+    if g.moon = invalid then g.moon = {xOff: 0} else g.moon.xOff = 0
     'Update moon landscape
     if g.moon.landscape = g.const.MOON_HILLS
         g.moon.landscape = g.const.MOON_CITY
     else
         g.moon.landscape = g.const.MOON_HILLS
     end if
-    g.moon.holes.Push({x: 1000, size: 1})
-    g.moon.holes.Push({x: 1300, size: 2})
-    g.moon.holes.Push({x: 1700, size: 3})
-    'Create Buggy
-    'if g.buggy = invalid then g.buggy = CreateBuggy()
+    if g.currentCourse = g.const.COURSE_BEGINNER
+        obstacles = g.courses.begginer[g.currentStage].obstacles
+        enemies = g.courses.begginer[g.currentStage].enemies
+    else
+        obstacles = g.courses.champion[g.currentStage].obstacles
+        enemies = g.courses.champion[g.currentStage].enemies
+    end if
+    g.moon.obstacles = []
+    for each obs in obstacles
+        if obs.size = "?" then size = Rnd(2).ToStr() else size = obs.size
+        g.moon.obstacles.Push({type: obs.type, x: obs.x, size: size})
+    next
     m.startup = true
     m.time = 0
     StopAudio()
@@ -85,6 +94,7 @@ Sub GameLogo(waitTime as integer)
     ticks = m.clock.TotalMilliseconds()
     m.mainScreen.Clear(m.colors.black)
     m.mainScreen.SwapBuffers()
+    m.mainScreen.Clear(m.colors.black)
     rgn = m.regions.images.Lookup("game-logo")
     top = m.compositor.NewSprite(0, 0, rgn, m.const.LAYER2_Z)
     DrawMoon()

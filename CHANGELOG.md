@@ -1,4 +1,10 @@
-#####v0.3 - 05-Mar-2017 - Buggy Jump, Holes, Score board
+## Moon Patrol Changelog
+
+##### v0.4 - 17-Aug-2017 - Initial map implementation with rock obstacles
+* Add: Rock sprites
+* Add: Basic map architecture
+
+##### v0.3 - 05-Mar-2017 - Buggy Jump, Holes, Score board
 * Add: Buggy Control: Jump
 * Add: Holes over the terrain (3 sizes)
 * Add: Stage letters on terrain
@@ -6,7 +12,7 @@
 * Add: Buggy crash on holes
 * Add: Sound effects: Jump, Crash
 
-#####v0.2 - 19-Feb-2017 - Buggy animation, Terrain Generation
+##### v0.2 - 19-Feb-2017 - Buggy animation, Terrain Generation
 * Add: Buggy and Wheels animation
 * Add: Basic Terrain generation
 * Add: Start over Lunar base
@@ -14,7 +20,7 @@
 * Add: Background theme song
 * Add: Course start message and sound
 
-#####v0.1 - 16-Feb-2017 - Initial Version
+##### v0.1 - 16-Feb-2017 - Initial Version
 * Add: Splash screen
 * Add: Game Menu
 * Add: Credits screen

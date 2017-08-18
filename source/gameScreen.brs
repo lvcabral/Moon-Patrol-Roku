@@ -15,7 +15,6 @@ Sub PlayGame()
     m.mainScreen.SwapBuffers()
     m.mainScreen.Clear(m.colors.black)
     'Initialize flags and aux variables
-    m.debug = false
     m.gameOver = false
     m.freeze = false
     m.high = {score: m.settings.highScores[0].score, point: m.settings.highScores[0].point}
@@ -83,9 +82,10 @@ Sub PlayGame()
                 if m.buggy.crashed
                     m.lives--
                     if m.lives >= 0
+                        DestroyMoon()
+                        DestroyBuggy()
                         ResetGame()
                         DrawMoon()
-                        DestroyBuggy()
                     else
                         m.gameOver = true
                     end if
@@ -124,6 +124,7 @@ Sub DrawMoon()
     m.moon.layers[2].sprite = m.compositor.NewSprite(0, m.const.GROUND_LEVEL_Y, m.moon.layers[2].region, m.const.LAYER2_Z)
     m.moon.layers[2].sprite.SetMemberFlags(0)
     m.moon.stage = {current: m.currentStage, switch: false}
+    'm.moon.xOff = m.const.PANEL_WIDTH
     'Draw base
     y = m.const.GROUND_LEVEL_Y + m.const.GROUND_OFFSET_Y
     z = m.const.LAYER2_Z + 1
@@ -134,15 +135,21 @@ Sub DrawMoon()
         m.moon.base.SetMemberFlags(0)
         BuggyUpdate()
     end if
-    'Draw holes
-    y -= 8
-    for h = 0 to m.moon.holes.Count() - 1
-        hrg = m.regions.sprites.Lookup("hole-" + m.moon.holes[h].size.ToStr())
-        hrg.SetCollisionRectangle(8, 0, hrg.GetWidth() - 16, hrg.GetHeight())
-        hrg.SetCollisionType(1)
-        x = m.moon.holes[h].x
-        m.moon.holes[h].sprite = m.compositor.NewSprite(x, y + m.terrain[x], hrg, z)
-        m.moon.holes[h].sprite.SetData("hole")
+    'Draw obstacles
+    for each obs in m.moon.obstacles
+        org = m.regions.sprites.Lookup(obs.type + "-" + obs.size)
+        if obs.type = "hole"
+            org.SetCollisionRectangle(8, 0, org.GetWidth() - 16, org.GetHeight())
+            org.SetCollisionType(1)
+            yo = 8
+        else if obs.type = "rock"
+            yo = org.GetHeight() - 8
+        end if
+        if obs.x < m.const.TERRAIN_WIDTH
+            obs.y = y - yo + m.terrain[obs.x]
+            obs.sprite = m.compositor.NewSprite(obs.x, obs.y, org, z)
+            obs.sprite.SetData(obs.type)
+        end if
     next
 End Sub
 
@@ -237,6 +244,24 @@ Sub MoonUpdate()
         m.moon.layers[2].sprite = m.compositor.NewSprite(0, m.const.GROUND_LEVEL_Y, m.moon.layers[2].region, m.const.LAYER2_Z)
         m.moon.layers[2].sprite.SetMemberFlags(0)
         m.moon.stage.switch = not m.moon.stage.switch
+        y = m.const.GROUND_LEVEL_Y + m.const.GROUND_OFFSET_Y
+        z = m.const.LAYER2_Z + 1
+        for each obs in m.moon.obstacles
+            if obs.y = invalid
+                org = m.regions.sprites.Lookup(obs.type + "-" + obs.size)
+                if obs.type = "hole"
+                    org.SetCollisionRectangle(8, 0, org.GetWidth() - 16, org.GetHeight())
+                    org.SetCollisionType(1)
+                    yo = 8
+                else if obs.type = "rock"
+                    yo = org.GetHeight() - 8
+                end if
+                obs.x -= m.const.PANEL_WIDTH
+                obs.y = y - yo + m.terrain[obs.x]
+                obs.sprite = m.compositor.NewSprite(obs.x, obs.y, org, z)
+                obs.sprite.SetData(obs.type)
+            end if
+        next
     end if
     if m.moon.base <> invalid
         m.moon.base.MoveOffset(-m.moon.layers[2].speed, 0)
@@ -246,12 +271,12 @@ Sub MoonUpdate()
             print "base sprite destroyed"
         end if
     end if
-    for each hole in m.moon.holes
-        if hole.sprite <> invalid
-            hole.sprite.MoveOffset(-m.moon.layers[2].speed, 0)
-            if hole.sprite.GetX() + 64 < 0
-                hole.sprite.Remove()
-                hole.sprite = invalid
+    for each obs in m.moon.obstacles
+        if obs.sprite <> invalid
+            obs.sprite.MoveOffset(-m.moon.layers[2].speed, 0)
+            if obs.sprite.GetX() + 80 < 0
+                obs.sprite.Remove()
+                obs.sprite = invalid
             end if
         end if
     next
@@ -343,11 +368,19 @@ Sub BuggyUpdate()
                     print "buggy front wheels fall into a hole!"
                     m.buggy.state = m.const.BUGGY_CRASH_FRONT
                     m.buggy.frame = 0
+                else if objHit <> invalid and objHit.GetData() = "rock"
+                    print "buggy front wheels hit a rock!"
+                    m.buggy.state = m.const.BUGGY_CRASH_DRIVE
+                    m.buggy.frame = 0
                 else
                     objHit = m.buggy.wheels[0].CheckCollision()
                     if objHit <> invalid and objHit.GetData() = "hole"
                         print "buggy back wheels fall into a hole!"
                         m.buggy.state = m.const.BUGGY_CRASH_BACK
+                        m.buggy.frame = 0
+                    else if objHit <> invalid and objHit.GetData() = "rock"
+                        print "buggy back wheels hit a rock!"
+                        m.buggy.state = m.const.BUGGY_CRASH_DRIVE
                         m.buggy.frame = 0
                     end if
                 end if
@@ -376,19 +409,27 @@ Sub BuggyUpdate()
                 if m.buggy.frame = 0
                     StopAudio()
                     PlaySound("crash")
-                    rgn = m.regions.sprites.Lookup("buggy-" + m.buggy.state.ToStr())
-                    m.buggy.sprite.SetRegion(rgn)
-                    if m.buggy.state = m.const.BUGGY_CRASH_FRONT
-                        m.buggy.sprite.MoveOffset(32, 32)
-                    else
-                        m.buggy.sprite.MoveOffset(-32, 32)
-                    end if
-                    m.buggy.x = m.buggy.sprite.GetX()
-                    m.buggy.y = m.buggy.sprite.GetY()
-                    if m.settings.spriteMode = m.const.MODE_ARCADE
-                        m.buggy.wheels[0].Remove()
-                        m.buggy.wheels[1].Remove()
-                        m.buggy.wheels[2].Remove()
+                    if m.buggy.state < m.const.BUGGY_CRASH_DRIVE
+                        rgn = m.regions.sprites.Lookup("buggy-" + m.buggy.state.ToStr())
+                        m.buggy.sprite.SetRegion(rgn)
+                        if m.buggy.state = m.const.BUGGY_CRASH_FRONT
+                            m.buggy.sprite.MoveOffset(32, 32)
+                        else if m.buggy.state = m.const.BUGGY_CRASH_BACK
+                            m.buggy.sprite.MoveOffset(-32, 32)
+                        end if
+                        m.buggy.x = m.buggy.sprite.GetX()
+                        m.buggy.y = m.buggy.sprite.GetY()
+                        if m.settings.spriteMode = m.const.MODE_ARCADE
+                            m.buggy.wheels[0].Remove()
+                            m.buggy.wheels[1].Remove()
+                            m.buggy.wheels[2].Remove()
+                        else
+                            m.buggy.loose.frame = 0
+                            off = m.buggy.loose.anim[0]
+                            m.buggy.wheels[0].MoveOffset(-abs(off), off)
+                            m.buggy.wheels[1].MoveOffset(0, off)
+                            m.buggy.wheels[2].MoveOffset(Abs(off), off)
+                        end if
                     else
                         m.buggy.loose.frame = 0
                         off = m.buggy.loose.anim[0]
@@ -470,10 +511,10 @@ Sub DestroyMoon()
         m.moon.base.Remove()
         m.moon.base = invalid
     end if
-    for each hole in m.moon.holes
-        if hole.sprite <> invalid
-            hole.sprite.Remove()
-            hole.sprite = invalid
+    for each obs in m.moon.obstacles
+        if obs.sprite <> invalid
+            obs.sprite.Remove()
+            obs.sprite = invalid
         end if
     next
 End Sub

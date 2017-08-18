@@ -1,0 +1,32 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "tasks": [
+        {
+            "taskName": "build",
+            "command": "roku",
+            "isBuildCommand": true,
+            "isShellCommand": true,
+            "echoCommand": true,
+            "args": ["-ls", "release", "-P", "${workspaceRootFolderName}", "-O",  "out"],
+            "showOutput": "always"
+        },
+        {
+            "taskName": "package",
+            "command": "roku",
+            "isShellCommand": true,
+            "echoCommand": true,
+            "args": ["-ps", "release", "-P", "${workspaceRootFolderName}", "-O",  "out"],
+            "showOutput": "always"
+        },
+        {
+            "taskName": "screenshot",
+            "command": "roku",
+            "isShellCommand": true,
+            "echoCommand": true,
+            "args": ["-S", "-P", "${workspaceRootFolderName}"],
+            "showOutput": "always"
+        }
+    ]
+}

@@ -11,7 +11,7 @@
 Function GetConstants() as object
     const = {}
 
-    const.GAME_SPEED  = 40 '25 fps
+    const.GAME_SPEED  = 33 '25 fps
 
     const.MODE_ARCADE = 0
     const.MODE_ATARI  = 1
@@ -26,6 +26,7 @@ Function GetConstants() as object
     const.BUGGY_JUMP         = 1
     const.BUGGY_CRASH_FRONT  = 2
     const.BUGGY_CRASH_BACK   = 3
+    const.BUGGY_CRASH_DRIVE  = 4
 
     const.BACK_MOUNTAINS_Y = 188
     const.FRONT_HILLS_Y    = 258
@@ -101,13 +102,19 @@ Function GetTerrain(width as integer, label = "" as string, continue = false as 
         mColor = &h00A000FF
         gColor = &hC06000FF
     end if
-    ' Enable for debug
-    ' if m.ct = invalid then m.ct = 0
-    ' if IsOdd(m.ct) then gColor = m.colors.cyan else gColor = m.colors.blue
-    ' m.ct++
+    if m.debug
+        if m.ct = invalid then m.ct = 0
+        if IsOdd(m.ct) then gColor = m.colors.cyan else gColor = m.colors.blue
+        m.ct++
+    end if
     bmp = CreateObject("roBitmap", {width:width, height:m.const.PANEL_HEIGHT, alphaenable:true})
     height = m.const.PANEL_HEIGHT - m.const.GROUND_OFFSET_Y
     bmp.DrawRect(0, m.const.GROUND_OFFSET_Y, bmp.GetWidth(), height, gColor)
+    if m.debug and width > m.const.PANEL_WIDTH
+        for l = 639 to width step 640
+            bmp.DrawLine(l, 0, l, m.const.PANEL_HEIGHT, m.colors.white)
+        next
+    end if
     c = 0
     if continue
         depth = m.terrain[m.terrain.Count() - 1]
@@ -146,8 +153,9 @@ Function GetTerrain(width as integer, label = "" as string, continue = false as 
         s -= wide
         c += wide
     end while
-    print "terrain array size = "; m.terrain.Count()
     bmp.Finish()
+    print "terrain bitmap size = "; bmp.GetWidth()
+    print "terrain array size = "; m.terrain.Count()
     return bmp
 End Function
 
@@ -272,8 +280,8 @@ End Function
 
 Function IsOpenGL() as Boolean
     di = CreateObject("roDeviceInfo")
-    model = Val(Left(di.GetModel(),1))
-    return (model = 3 or model = 4 or model = 6)
+    graph = di.GetGraphicsPlatform()
+    return (graph = "opengl")
 End Function
 
 Function GetManifestArray() as Object

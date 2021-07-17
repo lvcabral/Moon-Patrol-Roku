@@ -1,32 +1,47 @@
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
-    "version": "0.1.0",
+    "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "build",
+            "label": "build",
+            "type": "shell",
             "command": "roku",
-            "isBuildCommand": true,
-            "isShellCommand": true,
-            "echoCommand": true,
-            "args": ["-ls", "release", "-P", "${workspaceRootFolderName}", "-O",  "out"],
-            "showOutput": "always"
+            "args": [
+                "-ls",
+                "release",
+                "-P",
+                "${workspaceRootFolderName}",
+                "-O",
+                "out"
+            ],
+            "problemMatcher": [],
+            "group": "build"
         },
         {
-            "taskName": "package",
+            "label": "package",
+            "type": "shell",
             "command": "roku",
-            "isShellCommand": true,
-            "echoCommand": true,
-            "args": ["-ps", "release", "-P", "${workspaceRootFolderName}", "-O",  "out"],
-            "showOutput": "always"
+            "args": [
+                "-ps",
+                "release",
+                "-P",
+                "${workspaceRootFolderName}",
+                "-O",
+                "out"
+            ],
+            "problemMatcher": []
         },
         {
-            "taskName": "screenshot",
+            "label": "screenshot",
+            "type": "shell",
             "command": "roku",
-            "isShellCommand": true,
-            "echoCommand": true,
-            "args": ["-S", "-P", "${workspaceRootFolderName}"],
-            "showOutput": "always"
+            "args": [
+                "-S",
+                "-P",
+                "${workspaceRootFolderName}"
+            ],
+            "problemMatcher": []
         }
     ]
 }

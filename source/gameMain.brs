@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: March 2017
+' **  Updated: March 2021
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -20,6 +20,7 @@ Sub Main()
     'Util objects
     app = CreateObject("roAppManager")
     app.SetTheme(GetTheme())
+    m.theme = GetTheme()
     m.debug = false
     m.port = CreateObject("roMessagePort")
     m.clock = CreateObject("roTimespan")
@@ -27,10 +28,10 @@ Sub Main()
     m.audioPort = CreateObject("roMessagePort")
     m.audioPlayer.SetMessagePort(m.audioPort)
     m.sounds = LoadSounds(true)
-    m.fonts = CreateObject("roFontRegistry")
-    m.fonts.Register("pkg:/assets/fonts/PressStart2P.ttf")
-    m.gameFont = m.fonts.getFont("Press Start 2P", 16, false, false)
-    m.smallFont = m.fonts.getFont("Press Start 2P", 14, false, false)
+    m.fonts = {reg:CreateObject("roFontRegistry")}
+    m.fonts.reg.Register("pkg:/assets/fonts/PressStart2P.ttf")
+    m.gameFont = m.fonts.reg.getFont("Press Start 2P", 16, false, false)
+    m.smallFont = m.fonts.reg.getFont("Press Start 2P", 14, false, false)
     m.manifest = GetManifestArray()
     m.settings = LoadSettings()
     m.isOpenGL = isOpenGL()
@@ -103,7 +104,7 @@ Sub GameLogo(waitTime as integer)
     m.mainScreen.SwapBuffers()
 	while true
     	key = wait(waitTime, m.port)
-		if key = invalid or key < 100 then exit while
+		if key = invalid or key.getInt() < 100 then exit while
 	end while
     top.Remove()
 End Sub
@@ -151,6 +152,7 @@ End Sub
 Sub ResetScreen(mainWidth as integer, mainHeight as integer, gameWidth as integer, gameHeight as integer)
     g = GetGlobalAA()
     g.mainScreen = CreateObject("roScreen", true, mainWidth, mainHeight)
+    g.mainScreen.SetAlphaEnable(true)
     g.mainScreen.SetMessagePort(g.port)
     xOff = Cint((mainWidth-gameWidth) / 2)
     drwRegions = dfSetupDisplayRegions(g.mainScreen, xOff, 0, gameWidth, gameHeight)
@@ -167,7 +169,7 @@ Function GetTheme() as object
             OverhangSliceHD: "pkg:/images/overhang_hd.jpg",
             ListScreenHeaderText: "#FFFFFF",
             ListScreenDescriptionText: "#FFFFFF",
-            ListItemHighlightText: "#FFD801"
+            ListItemHighlightText: "#FFD801FF"
             }
     return theme
 End Function

@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: February 2017
+' **  Updated: February 2021
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -14,6 +14,7 @@ Function LoadSounds(enable as boolean) as object
                 folder: "pkg:/assets/sounds/",
                 mp3: {clip:"", priority:0, cycles:0},
                 wav: [{clip:"", priority:0, cycles:0}, {clip:"", priority:0, cycles:0}],
+                deadend : CreateObject("roAudioResource", "deadend"),
                 navSingle : CreateObject("roAudioResource", "navsingle"),
                 select : CreateObject("roAudioResource", "select")
              }

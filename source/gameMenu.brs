@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: March 2017
+' **  Updated: March 2021
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -11,9 +11,9 @@
 
 Function StartMenu(focus as integer) as integer
     this = {
-            screen: CreateObject("roListScreen")
-            port: CreateObject("roMessagePort")
-           }
+        screen: CreateListScreen(true)
+        port: m.port
+    }
     'Cache HighScore bitmap
     if m.scoresChanged = invalid or m.scoresChanged
         print "caching high scores"
@@ -40,58 +40,57 @@ Function StartMenu(focus as integer) as integer
     oldIndex = 0
     selection = -1
     while true
-        msg = wait(0,this.port)
-        if msg.isScreenClosed() then exit while
-        if type(msg) = "roListScreenEvent"
-            if msg.isListItemFocused()
-                listIndex = msg.GetIndex()
-            else if msg.isListItemSelected()
-                selection = msg.GetIndex()
-                if selection = m.const.MENU_START
-                    SaveSettings(m.settings)
-                    exit while
-                else if selection >= m.const.MENU_HISCORES
-                    exit while
+        msg = this.screen.Wait(this.port)
+        if msg.isScreenClosed() 
+            exit while
+        else if msg.isListItemFocused()
+            listIndex = msg.GetIndex()
+        else if msg.isListItemSelected()
+            selection = msg.GetIndex()
+            if selection = m.const.MENU_START
+                SaveSettings(m.settings)
+                exit while
+            else if selection >= m.const.MENU_HISCORES
+                exit while
+            end if
+        else if msg.isRemoteKeyPressed()
+            remoteKey = msg.GetIndex()
+            update = (remoteKey = m.code.BUTTON_LEFT_PRESSED or remoteKey = m.code.BUTTON_RIGHT_PRESSED)
+            if remoteKey = m.code.BUTTON_REWIND_PRESSED
+                this.screen.SetFocusedListItem(m.const.MENU_START)
+            else if remoteKey = m.code.BUTTON_FAST_FORWARD_PRESSED
+                this.screen.SetFocusedListItem(m.const.MENU_CREDITS)
+            else if listIndex = m.const.MENU_CONTROL
+                if remoteKey = m.code.BUTTON_LEFT_PRESSED
+                    m.settings.controlMode--
+                    if m.settings.controlMode < 0 then m.settings.controlMode = this.controlModes.Count() - 1
+                else if remoteKey = m.code.BUTTON_RIGHT_PRESSED
+                    m.settings.controlMode++
+                    if m.settings.controlMode = this.controlModes.Count() then m.settings.controlMode = 0
                 end if
-            else if msg.isRemoteKeyPressed()
-                remoteKey = msg.GetIndex()
-                update = (remoteKey = m.code.BUTTON_LEFT_PRESSED or remoteKey = m.code.BUTTON_RIGHT_PRESSED)
-                if remoteKey = m.code.BUTTON_REWIND_PRESSED
-                    this.screen.SetFocusedListItem(m.const.MENU_START)
-                else if remoteKey = m.code.BUTTON_FAST_FORWARD_PRESSED
-                    this.screen.SetFocusedListItem(m.const.MENU_CREDITS)
-                else if listIndex = m.const.MENU_CONTROL
-                    if remoteKey = m.code.BUTTON_LEFT_PRESSED
-                        m.settings.controlMode--
-                        if m.settings.controlMode < 0 then m.settings.controlMode = this.controlModes.Count() - 1
-                    else if remoteKey = m.code.BUTTON_RIGHT_PRESSED
-                        m.settings.controlMode++
-                        if m.settings.controlMode = this.controlModes.Count() then m.settings.controlMode = 0
-                    end if
-                    if update
-                        listItems[listIndex].Title = "Control: " + this.controlModes[m.settings.controlMode]
-                        listItems[listIndex].ShortDescriptionLine1 = this.controlHelp[m.settings.controlMode]
-                        listItems[listIndex].HDPosterUrl = this.controlImage[m.settings.controlMode]
-                        listItems[listIndex].SDPosterUrl = this.controlImage[m.settings.controlMode]
-                        this.screen.SetItem(listIndex, listItems[listIndex])
-                        m.sounds.navSingle.Trigger(50)
-                    end if
-                else if listIndex = m.const.MENU_SPRITES
-                    if remoteKey = m.code.BUTTON_LEFT_PRESSED
-                        m.settings.spriteMode--
-                        if m.settings.spriteMode < 0 then m.settings.spriteMode = this.spriteMode.Count() - 1
-                    else if remoteKey = m.code.BUTTON_RIGHT_PRESSED
-                        m.settings.spriteMode++
-                        if m.settings.spriteMode = this.spriteMode.Count() then m.settings.spriteMode = 0
-                    end if
-                    if update
-                        listItems[listIndex].Title = "Graphics: " + this.spriteMode[m.settings.spriteMode]
-                        listItems[listIndex].ShortDescriptionLine1 = this.spriteHelp[m.settings.spriteMode]
-                        listItems[listIndex].HDPosterUrl = this.spriteImage[m.settings.spriteMode]
-                        listItems[listIndex].SDPosterUrl = this.spriteImage[m.settings.spriteMode]
-                        this.screen.SetItem(listIndex, listItems[listIndex])
-                        m.sounds.navSingle.Trigger(50)
-                    end if
+                if update
+                    listItems[listIndex].Title = "Control: " + this.controlModes[m.settings.controlMode]
+                    listItems[listIndex].ShortDescriptionLine1 = this.controlHelp[m.settings.controlMode]
+                    listItems[listIndex].HDPosterUrl = this.controlImage[m.settings.controlMode]
+                    listItems[listIndex].SDPosterUrl = this.controlImage[m.settings.controlMode]
+                    this.screen.SetItem(listIndex, listItems[listIndex])
+                    m.sounds.navSingle.Trigger(50)
+                end if
+            else if listIndex = m.const.MENU_SPRITES
+                if remoteKey = m.code.BUTTON_LEFT_PRESSED
+                    m.settings.spriteMode--
+                    if m.settings.spriteMode < 0 then m.settings.spriteMode = this.spriteMode.Count() - 1
+                else if remoteKey = m.code.BUTTON_RIGHT_PRESSED
+                    m.settings.spriteMode++
+                    if m.settings.spriteMode = this.spriteMode.Count() then m.settings.spriteMode = 0
+                end if
+                if update
+                    listItems[listIndex].Title = "Graphics: " + this.spriteMode[m.settings.spriteMode]
+                    listItems[listIndex].ShortDescriptionLine1 = this.spriteHelp[m.settings.spriteMode]
+                    listItems[listIndex].HDPosterUrl = this.spriteImage[m.settings.spriteMode]
+                    listItems[listIndex].SDPosterUrl = this.spriteImage[m.settings.spriteMode]
+                    this.screen.SetItem(listIndex, listItems[listIndex])
+                    m.sounds.navSingle.Trigger(50)
                 end if
             end if
         end if
@@ -168,7 +167,7 @@ Sub ShowHighScores(waitTime = 0 as integer)
     screen.SwapBuffers()
     while true
         key = wait(waitTime, m.port)
-        if key = invalid or key < 100 then exit while
+        if key = invalid or key.getInt() < 100 then exit while
     end while
 End Sub
 
@@ -188,7 +187,7 @@ Sub ShowCredits(waitTime = 0 as integer)
     screen.SwapBuffers()
 	while true
     	key = wait(waitTime, m.port)
-		if key = invalid or key < 100 then exit while
+		if key = invalid or key.getInt() < 100 then exit while
 	end while
 End Sub
 

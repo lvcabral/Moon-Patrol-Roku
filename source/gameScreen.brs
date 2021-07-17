@@ -3,7 +3,7 @@
 ' **  Roku Moon Patrol Channel - http://github.com/lvcabral/Moon-Patrol-Roku
 ' **
 ' **  Created: February 2017
-' **  Updated: March 2017
+' **  Updated: March 2021
 ' **
 ' **  Remake in BrigthScript developed by Marcelo Lv Cabral - http://lvcabral.com
 ' ********************************************************************************************************
@@ -477,7 +477,7 @@ Sub PauseGame()
     m.mainScreen.SwapBuffers()
     while true
         key = wait(0, m.port)
-        if key = m.code.BUTTON_PLAY_PRESSED then exit while
+        if key.getInt() = m.code.BUTTON_PLAY_PRESSED then exit while
     end while
     m.audioPlayer.Play()
     m.clock.Mark()
